@@ -33,7 +33,7 @@ app.post('/webhook', (req, res) => {
 
                         getCafePrice().then(res => {
                             for (const item of res) {
-                                sendMessage(senderId, item.province + ": " + item.price + "₫");
+                                setTimeout(() => {sendMessage(senderId, item.province + ": " + item.price + "₫");}, 1000);
                             }
                         }).catch(err => console.log(err));
                     }
