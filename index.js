@@ -1,5 +1,3 @@
-'use strict';
-
 // Imports dependencies and set up http server
 require('dotenv').config();
 
@@ -35,7 +33,7 @@ app.post('/webhook', (req, res) => {
                         
                         let reply = [];
                         reply = getCafePrice();
-
+                        console.log(reply);
                         for (const item of reply) {
                             sendMessage(senderId, item.province + ": " + item.price + "₫");
                         }
