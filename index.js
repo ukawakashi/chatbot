@@ -53,7 +53,7 @@ app.post('/webhook', (req, res) => {
 });
 
 async function getCafePrice() {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
     const page = await browser.newPage();
     await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia');
 
