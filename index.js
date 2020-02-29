@@ -28,12 +28,13 @@ app.post('/webhook', (req, res) => {
                 if(message.message) {
                     // If user send text
                     let text = message.message.text;
-                    if(text === 'gia ca phe') {
+                    if(text == 'gia ca phe') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
 
                         getCafePrice().then(res => {
+                            console.log(res);
                             for (const item of res) {
-                                setTimeout(() => {sendMessage(senderId, item.province + ": " + item.price + "₫");}, 1000);
+                                sendMessage(senderId, item.province + ": " + item.price + "₫");
                             }
                         }).catch(err => console.log(err));
                     }
