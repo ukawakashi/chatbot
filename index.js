@@ -52,7 +52,7 @@ app.post('/webhook', (req, res) => {
 
 });
 
-async function getCafePrice() {
+export async function getCafePrice() {
     let fResult = [];
 
     const browser = await puppeteer.launch({args: ['--no-sandbox']});
