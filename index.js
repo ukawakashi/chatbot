@@ -1,6 +1,8 @@
 'use strict';
 
 // Imports dependencies and set up http server
+require('dotenv').config();
+
 const
     express = require('express'),
     bodyParser = require('body-parser'),
@@ -24,9 +26,10 @@ app.post('/webhook', (req, res) => {
             for(let message of messaging) {
                 let senderId = message.sender.id;
                 if(message.message) {
-                    // if user send text
+                    // If user send text
                     let text = message.message.text;
                     console.log(text);
+                    sendMessage(senderId, "Chào bạn");
                 }
             }
         });
@@ -40,11 +43,30 @@ app.post('/webhook', (req, res) => {
 
 });
 
+// Send message to REST API to reply user message
+function sendMessage(senderId, message) {
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: process.env.TOKEN,
+        },
+        method: 'POST',
+        json: {
+            recipient: {
+                id: senderId
+            },
+            message: {
+                text: message
+            },
+        }
+    });
+}
+
 // Adds support for GET requests to our webhook
 app.get('/webhook', (req, res) => {
 
     // Your verify token. Should be a random string.
-    let VERIFY_TOKEN = "kawakashi";
+    let VERIFY_TOKEN = process.env.MY_VERIFY_TOKEN;
 
     // Parse the query params
     let mode = req.query['hub.mode'];
