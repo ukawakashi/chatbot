@@ -27,8 +27,9 @@ app.post('/webhook', (req, res) => {
                 let senderId = message.sender.id;
                 if(message.message) {
                     // If user send text
-                    let text = message.message.text;
-                    if(text == 'gia ca phe') {
+                    let text = message.message.text.toLowerCase();
+                    text = text.replace(/\s+/g, '');
+                    if(text === 'giacaphe' || text === 'giácàphê') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
 
                         getCafePrice().then(res => {
