@@ -7,6 +7,7 @@ const
     express = require('express'),
     bodyParser = require('body-parser'),
     request = require('request'),
+    puppeteer = require('puppeteer'),
     app = express().use(bodyParser.json()); // creates express http server
 
 // Sets server port and logs message on success
@@ -29,8 +30,14 @@ app.post('/webhook', (req, res) => {
                 if(message.message) {
                     // If user send text
                     let text = message.message.text;
+                    if(text === 'gia ca phe') {
+                        let reply = getCafePrice();
+                        sendMessage(senderId, "Chào bạn\n Giá cà phê hôm nay:");
+                        reply.forEach((item) => {
+                            sendMessage(senderId, item.province + ": " + item.price + "₫");
+                        });
+                    }
                     console.log(text);
-                    sendMessage(senderId, "Chào bạn");
                 }
             }
         });
@@ -43,6 +50,39 @@ app.post('/webhook', (req, res) => {
     }
 
 });
+
+async function getCafePrice() {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia');
+
+    const results = await page.evaluate(() => {
+        let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
+        let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
+        let listProvinces = [];
+        let listPrice = [];
+        let result = [];
+        provinces.forEach((item) => {
+            listProvinces.push(item.innerText);
+        });
+        price.forEach((province) => {
+            listPrice.push(province.innerText);
+        });
+
+        for(let i = 1; i < listPrice.length - 2; i++) {
+            result.push({
+                province: listProvinces[i],
+                price: listPrice[i]
+            });
+        }
+
+        return result;
+    });
+
+    await browser.close();
+
+    return results;
+}
 
 // Send message to REST API to reply user message
 function sendMessage(senderId, message) {
