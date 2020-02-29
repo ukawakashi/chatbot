@@ -30,15 +30,13 @@ app.post('/webhook', (req, res) => {
                     let text = message.message.text;
                     if(text === 'gia ca phe') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                        
-                        let reply = [];
-                        reply = getCafePrice();
-                        console.log(reply);
-                        for (const item of reply) {
-                            sendMessage(senderId, item.province + ": " + item.price + "₫");
-                        }
+
+                        getCafePrice().then(res => {
+                            for (const item of res) {
+                                sendMessage(senderId, item.province + ": " + item.price + "₫");
+                            }
+                        }).catch(err => console.log(err));
                     }
-                    console.log(text);
                 }
             }
         });
@@ -52,38 +50,42 @@ app.post('/webhook', (req, res) => {
 
 });
 
-export async function getCafePrice() {
-    let fResult = [];
+async function getCafePrice() {
+    try {
+        let fResult = [];
 
-    const browser = await puppeteer.launch({args: ['--no-sandbox']});
-    const page = await browser.newPage();
-    await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia', {waitUntil: 'domcontentloaded'});
+        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+        const page = await browser.newPage();
+        await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia', {waitUntil: 'domcontentloaded'});
 
-    fResult = await page.evaluate(() => {
-        let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
-        let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
-        let listProvinces = [];
-        let listPrice = [];
-        let result = [];
-        provinces.forEach((item) => {
-            listProvinces.push(item.innerText);
-        });
-        price.forEach((province) => {
-            listPrice.push(province.innerText);
-        });
-
-        for (let i = 1; i < listPrice.length - 2; i++) {
-            result.push({
-                province: listProvinces[i],
-                price: listPrice[i]
+        fResult = await page.evaluate(() => {
+            let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
+            let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
+            let listProvinces = [];
+            let listPrice = [];
+            let result = [];
+            provinces.forEach((item) => {
+                listProvinces.push(item.innerText);
             });
-        }
+            price.forEach((province) => {
+                listPrice.push(province.innerText);
+            });
 
-        return result;
-    });
-    await browser.close();
-    console.log(fResult);
-    return fResult;
+            for (let i = 1; i < listPrice.length - 2; i++) {
+                result.push({
+                    province: listProvinces[i],
+                    price: listPrice[i]
+                });
+            }
+
+            return result;
+        });
+        await browser.close();
+        return Promise.resolve(fResult);
+    }
+    catch (e) {
+        return Promise.reject(e);
+    }
 }
 
 // Send message to REST API to reply user message
