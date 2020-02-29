@@ -34,9 +34,7 @@ app.post('/webhook', (req, res) => {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
                         
                         let reply = [];
-                        reply = getCafePrice().then((result) => {
-                            return result;
-                        }).catch(err => console.log(err));
+                        reply = getCafePrice();
 
                         for (const item of reply) {
                             sendMessage(senderId, item.province + ": " + item.price + "₫");
@@ -56,37 +54,40 @@ app.post('/webhook', (req, res) => {
 
 });
 
-async function getCafePrice() {
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
-    const page = await browser.newPage();
-    await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia');
+function getCafePrice() {
+    let fResult = [];
+    ( async () => {
+        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+        const page = await browser.newPage();
+        await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia');
 
-    const results = await page.evaluate(() => {
-        let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
-        let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
-        let listProvinces = [];
-        let listPrice = [];
-        let result = [];
-        provinces.forEach((item) => {
-            listProvinces.push(item.innerText);
-        });
-        price.forEach((province) => {
-            listPrice.push(province.innerText);
-        });
-
-        for(let i = 1; i < listPrice.length - 2; i++) {
-            result.push({
-                province: listProvinces[i],
-                price: listPrice[i]
+        fResult = await page.evaluate(() => {
+            let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
+            let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
+            let listProvinces = [];
+            let listPrice = [];
+            let result = [];
+            provinces.forEach((item) => {
+                listProvinces.push(item.innerText);
             });
-        }
+            price.forEach((province) => {
+                listPrice.push(province.innerText);
+            });
 
-        return result;
-    });
+            for (let i = 1; i < listPrice.length - 2; i++) {
+                result.push({
+                    province: listProvinces[i],
+                    price: listPrice[i]
+                });
+            }
 
-    await browser.close();
+            return result;
+        });
 
-    return results;
+        await browser.close();
+    })();
+
+    return fResult;
 }
 
 // Send message to REST API to reply user message
