@@ -32,9 +32,12 @@ app.post('/webhook', (req, res) => {
                     let text = message.message.text;
                     if(text === 'gia ca phe') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+                        
                         let reply = [];
-                        reply = getCafePrice();
-                        console.log(reply);
+                        reply = getCafePrice().then((result) => {
+                            return result;
+                        }).catch(err => console.log(err));
+
                         for (const item of reply) {
                             sendMessage(senderId, item.province + ": " + item.price + "₫");
                         }
