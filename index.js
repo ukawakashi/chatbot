@@ -31,8 +31,9 @@ app.post('/webhook', (req, res) => {
                     // If user send text
                     let text = message.message.text;
                     if(text === 'gia ca phe') {
+                        sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+
                         let reply = getCafePrice();
-                        sendMessage(senderId, "Chào bạn\n Giá cà phê hôm nay:");
                         reply.forEach((item) => {
                             sendMessage(senderId, item.province + ": " + item.price + "₫");
                         });
