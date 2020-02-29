@@ -33,10 +33,10 @@ app.post('/webhook', (req, res) => {
                     if(text === 'gia ca phe') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
 
-                        // let reply = getCafePrice();
-                        // reply.forEach((item) => {
-                        //     sendMessage(senderId, item.province + ": " + item.price + "₫");
-                        // });
+                        let reply = getCafePrice();
+                        reply.forEach((item) => {
+                            sendMessage(senderId, item.province + ": " + item.price + "₫");
+                        });
                     }
                     console.log(text);
                 }
