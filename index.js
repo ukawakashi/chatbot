@@ -57,7 +57,7 @@ function getCafePrice() {
     ( async () => {
         const browser = await puppeteer.launch({args: ['--no-sandbox']});
         const page = await browser.newPage();
-        await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia');
+        await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia', {waitUntil: 'domcontentloaded'});
 
         fResult = await page.evaluate(() => {
             let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
