@@ -19,11 +19,16 @@ app.post('/webhook', (req, res) => {
 
         // Iterates over each entry - there may be multiple if batched
         body.entry.forEach(function(entry) {
+            let messaging = entry.messaging;
 
-            // Gets the message. entry.messaging is an array, but
-            // will only ever contain one message, so we get index 0
-            let webhook_event = entry.messaging[0];
-            console.log(webhook_event);
+            for(let message of messaging) {
+                let senderId = message.sender.id;
+                if(message.message) {
+                    // if user send text
+                    let text = message.message.text;
+                    console.log(text);
+                }
+            }
         });
 
         // Returns a '200 OK' response to all requests
@@ -39,7 +44,7 @@ app.post('/webhook', (req, res) => {
 app.get('/webhook', (req, res) => {
 
     // Your verify token. Should be a random string.
-    let VERIFY_TOKEN = "kawakashi"
+    let VERIFY_TOKEN = "kawakashi";
 
     // Parse the query params
     let mode = req.query['hub.mode'];
