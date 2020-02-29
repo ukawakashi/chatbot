@@ -6,6 +6,7 @@ require('dotenv').config();
 const
     express = require('express'),
     bodyParser = require('body-parser'),
+    request = require('request'),
     app = express().use(bodyParser.json()); // creates express http server
 
 // Sets server port and logs message on success
