@@ -34,6 +34,7 @@ app.post('/webhook', (req, res) => {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
                         let reply = [];
                         reply = getCafePrice();
+                        console.log(reply);
                         for (const item of reply) {
                             sendMessage(senderId, item.province + ": " + item.price + "₫");
                         }
