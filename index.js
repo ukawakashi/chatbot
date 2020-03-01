@@ -31,11 +31,11 @@ app.post('/webhook', (req, res) => {
                     text = text.replace(/\s+/g, '');
                     if(text === 'giacaphe' || text === 'giácàphê') {
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-
+                        let message = '';
                         getCafePrice().then(res => {
-                            console.log(res);
                             for (const item of res) {
-                                sendMessage(senderId, item.province + ": " + item.price + "₫");
+                                message += item.province + ": " + item.price + "₫\n";
+                                sendMessage(senderId, message);
                             }
                         }).catch(err => console.log(err));
                     }
