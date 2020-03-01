@@ -76,41 +76,46 @@ app.post('/webhook', (req, res) => {
 function sendGetStarted(recipientId) {
 
     let userData;
-    userData = getUserProfile(recipientId);
-    console.log(userData);
-    let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
+    getUserProfile(recipientId).then((result) => {
+        userData = result;
 
-    let messageData = {
-        recipient: {
-            id: recipientId
-        },
-        message: {
-            attachment: {
-                type: "template",
-                payload: {
-                    template_type: "button",
-                    text: text,
-                    buttons:[{
-                        type: "postback",
-                        title: "Xem giá cà phê",
-                        payload: "cafe_price"
-                    }, {
-                        type: "postback",
-                        title: "About",
-                        payload: "about"
-                    }]
+        let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
+
+        let messageData = {
+            recipient: {
+                id: recipientId
+            },
+            message: {
+                attachment: {
+                    type: "template",
+                    payload: {
+                        template_type: "button",
+                        text: text,
+                        buttons:[{
+                            type: "postback",
+                            title: "Xem giá cà phê",
+                            payload: "cafe_price"
+                        }, {
+                            type: "postback",
+                            title: "About",
+                            payload: "about"
+                        }]
+                    }
                 }
             }
-        }
-    };
+        };
 
-    request({
-        url: 'https://graph.facebook.com/v2.6/me/messages',
-        qs: {
-            access_token: process.env.TOKEN,
-        },
-        method: 'POST',
-        json: messageData
+        request({
+            url: 'https://graph.facebook.com/v2.6/me/messages',
+            qs: {
+                access_token: process.env.TOKEN,
+            },
+            method: 'POST',
+            json: messageData
+        });
+        
+    }).catch((err) => {
+        console.log(err);
     });
 }
 
@@ -172,24 +177,26 @@ function sendMessage(senderId, message) {
 }
 
 // Get user profile
-function getUserProfile(userId) {
-
-    let userProfile;
-    let url = "https://graph.facebook.com/" + userId;
-    request({
-        url: url,
-        qs: {
-            fields: 'first_name,last_name,profile_pic',
-            access_token: process.env.TOKEN,
-        },
-        method: 'GET',
-    }, function(err, res, body) {
-        if(!err && res.statusCode === 200) {
-            userProfile = JSON.parse(body);
-            console.log(userProfile);
-            return userProfile;
-        }
-    });
+async function getUserProfile(userId) {
+    try {
+        let url = "https://graph.facebook.com/" + userId;
+        let userProfile = await request({
+            url: url,
+            qs: {
+                fields: 'first_name,last_name,profile_pic',
+                access_token: process.env.TOKEN,
+            },
+            method: 'GET',
+        }, function (err, res, body) {
+            if (!err && res.statusCode === 200) {
+                return JSON.parse(body);
+            }
+        });
+        return userProfile;
+    }
+    catch(e) {
+        console.log("Err " + e);
+    }
 }
 
 // Adds support for GET requests to our webhook
