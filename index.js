@@ -35,7 +35,7 @@ app.post('/webhook', (req, res) => {
                 }
                 else if(message.postback && message.postback.payload) {
                     let message = '';
-
+                    console.log(message.postback.payload);
                     if(message.postback.payload === 'Get Started') {
                         sendGetStarted(senderId);
                     }
