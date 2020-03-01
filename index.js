@@ -83,7 +83,7 @@ function handlePostback(senderId, messagePostback) {
 
 function handleGreetingPostback(recipientId) {
 
-    let url = "https://graph.facebook.com/" + userId;
+    let url = "https://graph.facebook.com/" + recipientId;
     request({
         url: url,
         qs: {
