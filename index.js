@@ -16,7 +16,6 @@ app.post('/webhook', (req, res) => {
 
     let body = req.body;
 
-    console.log(body);
     // Checks this is an event from a page subscription
     if (body.object === 'page') {
 
@@ -25,29 +24,34 @@ app.post('/webhook', (req, res) => {
             let messaging = entry.messaging;
 
             for(let message of messaging) {
-                let senderId = message.sender.id;
-                switch (body) {
-                    case 'get_started':
-                        sendGetStarted(senderId);
-                        break;
 
-                    default:
-                        if(message.message) {
-                            // If user send text
-                            let text = message.message.text.toLowerCase();
-                            text = text.replace(/\s+/g, '');
-                            if(text === 'giacaphe' || text === 'giácàphê') {
-                                sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                                let message = '';
-                                getCafePrice().then(res => {
-                                    for (const item of res) {
-                                        message += item.province + ": " + item.price + "₫\n";
-                                    }
-                                    sendMessage(senderId, message);
-                                }).catch(err => console.log(err));
-                            }
+                let senderId = message.sender.id;
+
+                if(message.message) {
+                    let text = message.message.text;
+
+                    if(text === 'Get Started') {
+                        sendGetStarted(senderId);
+                    }
+                    else {
+
+                        text = text.toLowerCase().replace(/\s+/g, '');
+
+                        if (text === 'giacaphe' || text === 'giácàphê') {
+
+                            sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+                            let message = '';
+
+                            getCafePrice().then(res => {
+                                for (const item of res) {
+                                    message += item.province + ": " + item.price + "₫\n";
+                                }
+                                sendMessage(senderId, message);
+                            }).catch(err => console.log(err));
                         }
+                    }
                 }
+
             }
         });
 
