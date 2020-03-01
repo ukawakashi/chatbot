@@ -15,8 +15,8 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening on 
 app.post('/webhook', (req, res) => {
 
     let body = req.body;
-    let payload = req.payload;
-    console.log(payload);
+
+    console.log(body);
     // Checks this is an event from a page subscription
     if (body.object === 'page') {
 
@@ -26,7 +26,7 @@ app.post('/webhook', (req, res) => {
 
             for(let message of messaging) {
                 let senderId = message.sender.id;
-                switch (payload) {
+                switch (body) {
                     case 'get_started':
                         sendGetStarted(senderId);
                         break;
