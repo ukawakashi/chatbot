@@ -76,7 +76,7 @@ app.post('/webhook', (req, res) => {
 function sendGetStarted(recipientId) {
 
     let userData;
-    getUserProfile(recipientId).then((result) => {
+    getUserProfile(recipientId).then(result => {
         userData = result;
 
         let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
