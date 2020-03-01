@@ -74,6 +74,12 @@ app.post('/webhook', (req, res) => {
 });
 
 function sendGetStarted(recipientId) {
+
+    let userData;
+    userData = getUserProfile(recipientId);
+
+    let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
+
     let messageData = {
         recipient: {
             id: recipientId
@@ -83,7 +89,7 @@ function sendGetStarted(recipientId) {
                 type: "template",
                 payload: {
                     template_type: "button",
-                    text: "Chào {{user_full_name}}! Bạn cần thông tin gì nào ^_^",
+                    text: text,
                     buttons:[{
                         type: "postback",
                         title: "Xem giá cà phê",
@@ -162,6 +168,30 @@ function sendMessage(senderId, message) {
                 text: message
             },
         }
+    });
+}
+
+// Get user profile
+function getUserProfile(userId) {
+
+    let userProfile;
+    let url = "https://graph.facebook.com/" + userId;
+    request({
+        url: url,
+        qs: {
+            fields: 'first_name,last_name,profile_pic',
+            access_token: process.env.TOKEN,
+        },
+        method: 'GET',
+    }, function(err, res, data) {
+        if(err) {
+            console.log(err);
+        }
+        console.log(res);
+
+        userProfile = data;
+
+        return userProfile;
     });
 }
 
