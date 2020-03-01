@@ -183,15 +183,11 @@ function getUserProfile(userId) {
             access_token: process.env.TOKEN,
         },
         method: 'GET',
-    }, function(err, res, data) {
-        if(err) {
-            console.log(err);
+    }, function(err, res, body) {
+        if(!err && res.statusCode === 200) {
+            userProfile = JSON.parse(body);
+            return userProfile;
         }
-        console.log(res);
-
-        userProfile = data;
-
-        return userProfile;
     });
 }
 
