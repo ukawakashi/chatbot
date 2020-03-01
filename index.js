@@ -15,7 +15,7 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening on 
 app.post('/webhook', (req, res) => {
 
     let body = req.body;
-    console.log(body.entry.messaging);
+
     // Checks this is an event from a page subscription
     if (body.object === 'page') {
 
@@ -27,29 +27,26 @@ app.post('/webhook', (req, res) => {
 
                 let senderId = message.sender.id;
 
-                if(message.message) {
+                if(message.message && message.message.text) {
                     let text = message.message.text;
 
-                    if(text === 'Get Started') {
-                        sendGetStarted(senderId);
+                    text = text.toLowerCase().replace(/\s+/g, '');
+
+                    if (text === 'giacaphe' || text === 'giácàphê') {
+
+                        sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+                        let message = '';
+
+                        getCafePrice().then(res => {
+                            for (const item of res) {
+                                message += item.province + ": " + item.price + "₫\n";
+                            }
+                            sendMessage(senderId, message);
+                        }).catch(err => console.log(err));
                     }
-                    else {
-
-                        text = text.toLowerCase().replace(/\s+/g, '');
-
-                        if (text === 'giacaphe' || text === 'giácàphê') {
-
-                            sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                            let message = '';
-
-                            getCafePrice().then(res => {
-                                for (const item of res) {
-                                    message += item.province + ": " + item.price + "₫\n";
-                                }
-                                sendMessage(senderId, message);
-                            }).catch(err => console.log(err));
-                        }
-                    }
+                }
+                else if(message.postback && message.postback.payload) {
+                    sendGetStarted(senderId);
                 }
 
             }
