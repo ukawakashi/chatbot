@@ -77,7 +77,7 @@ function sendGetStarted(recipientId) {
 
     let userData;
     userData = getUserProfile(recipientId);
-
+    console.log(userData);
     let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
 
     let messageData = {
@@ -186,6 +186,7 @@ function getUserProfile(userId) {
     }, function(err, res, body) {
         if(!err && res.statusCode === 200) {
             userProfile = JSON.parse(body);
+            console.log(userProfile);
             return userProfile;
         }
     });
