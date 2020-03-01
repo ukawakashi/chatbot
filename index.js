@@ -37,30 +37,8 @@ app.post('/webhook', (req, res) => {
                     // Handle user message
                 }
                 else if(message.postback && message.postback.payload) {
-
-                    if(message.postback.payload === 'GET STARTED') {
-                        sendGetStarted(senderId);
-                    }
-                    else if(message.postback.payload === 'cafe_price') {
-
-                        sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                        let message = '';
-
-                        getCafePrice().then(res => {
-                            for (const item of res) {
-                                message += item.province + ": " + item.price + "₫\n";
-                            }
-                            sendMessage(senderId, message);
-                        }).catch(err => console.log(err));
-                    }
-                    else if(message.postback.payload === 'about') {
-                        let message = '';
-                        message = "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3";
-                        sendMessage(senderId, message);
-                    }
-
+                    handlePostback(senderId, message.postback);
                 }
-
             }
         });
 
@@ -73,49 +51,76 @@ app.post('/webhook', (req, res) => {
 
 });
 
-function sendGetStarted(recipientId) {
+function handlePostback(senderId, messagePostback) {
+    const payload = messagePostback.payload;
+    let message;
+    switch (payload) {
+        case "GET STARTED":
+            handleGreetingPostback(senderId);
+            break;
+        case "ABOUT":
+            message = {
+                text: "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3"
+            };
 
-    let userData;
-    getUserProfile(recipientId).then(result => {
-        userData = result;
+            callSendAPI(senderId, message);
+            break;
+        case "CAFE_PRICE":
+            callSendAPI(senderId, {text: "Chào bạn\nGiá cà phê hôm nay:"});
+            let text = '';
 
-        let text = "Chào " + userData.first_name + " " + userData.last_name + "! Bạn cần thông tin gì nào ^_^";
+            getCafePrice().then(res => {
+                for (const item of res) {
+                    text += item.province + ": " + item.price + "₫\n";
+                }
+                message = { text: text };
+                callSendAPI(senderId, message);
+            }).catch(err => console.log(err));
+            break;
+        default:
+    }
+}
 
-        let messageData = {
-            recipient: {
-                id: recipientId
-            },
-            message: {
-                attachment: {
-                    type: "template",
-                    payload: {
-                        template_type: "button",
-                        text: text,
-                        buttons:[{
-                            type: "postback",
-                            title: "Xem giá cà phê",
-                            payload: "cafe_price"
-                        }, {
-                            type: "postback",
-                            title: "About",
-                            payload: "about"
-                        }]
-                    }
+function handleGreetingPostback(recipientId) {
+
+    let url = "https://graph.facebook.com/" + userId;
+    request({
+        url: url,
+        qs: {
+            fields: 'first_name,last_name',
+            access_token: process.env.TOKEN,
+        },
+        method: 'GET',
+    }, function (err, res, body) {
+        let greeting = '';
+        if(err) {
+            console.log("error getting username: " + err);
+        } else {
+            let data = JSON.parse(body);
+            const firstName = data.first_name;
+            const lastName = data.last_name;
+            greeting = "Chào " + firstName+ " " + lastName + "! Bạn cần thông tin gì nào ^_^";
+        }
+
+        const greetingPayload = {
+            attachment: {
+                type: "template",
+                payload: {
+                    template_type: "button",
+                    text: greeting,
+                    buttons:[{
+                        type: "postback",
+                        title: "Xem giá cà phê",
+                        payload: "CAFE_PRICE"
+                    }, {
+                        type: "postback",
+                        title: "About",
+                        payload: "ABOUT"
+                    }]
                 }
             }
         };
-
-        request({
-            url: 'https://graph.facebook.com/v2.6/me/messages',
-            qs: {
-                access_token: process.env.TOKEN,
-            },
-            method: 'POST',
-            json: messageData
-        });
-        
-    }).catch((err) => {
-        console.log(err);
+        callSendAPI(recipientId, greetingPayload);
     });
 }
 
@@ -158,45 +163,27 @@ async function getCafePrice() {
 }
 
 // Send message to REST API to reply user message
-function sendMessage(senderId, message) {
+function callSendAPI(senderId, message) {
+
+    let request_body = {
+        recipient: {
+            id: senderId
+        },
+        message: message
+    };
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {
             access_token: process.env.TOKEN,
         },
         method: 'POST',
-        json: {
-            recipient: {
-                id: senderId
-            },
-            message: {
-                text: message
-            },
+        json: request_body
+    }, (err, res, body) => {
+        console.log("Message sent response body: ", body);
+        if(err) {
+            console.log("Unable to send message: ", err);
         }
     });
-}
-
-// Get user profile
-async function getUserProfile(userId) {
-    try {
-        let url = "https://graph.facebook.com/" + userId;
-        let userProfile = await request({
-            url: url,
-            qs: {
-                fields: 'first_name,last_name,profile_pic',
-                access_token: process.env.TOKEN,
-            },
-            method: 'GET',
-        }, function (err, res, body) {
-            if (!err && res.statusCode === 200) {
-                return JSON.parse(body);
-            }
-        });
-        return userProfile;
-    }
-    catch(e) {
-        console.log("Err " + e);
-    }
 }
 
 // Adds support for GET requests to our webhook
