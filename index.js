@@ -15,6 +15,7 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening on 
 app.post('/webhook', (req, res) => {
 
     let body = req.body;
+    let payload = req.payload;
 
     // Checks this is an event from a page subscription
     if (body.object === 'page') {
@@ -25,20 +26,27 @@ app.post('/webhook', (req, res) => {
 
             for(let message of messaging) {
                 let senderId = message.sender.id;
-                if(message.message) {
-                    // If user send text
-                    let text = message.message.text.toLowerCase();
-                    text = text.replace(/\s+/g, '');
-                    if(text === 'giacaphe' || text === 'giácàphê') {
-                        sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                        let message = '';
-                        getCafePrice().then(res => {
-                            for (const item of res) {
-                                message += item.province + ": " + item.price + "₫\n";
-                                sendMessage(senderId, message);
+                switch (payload) {
+                    case 'get_started':
+                        sendGetStarted(senderId);
+                        break;
+
+                    default:
+                        if(message.message) {
+                            // If user send text
+                            let text = message.message.text.toLowerCase();
+                            text = text.replace(/\s+/g, '');
+                            if(text === 'giacaphe' || text === 'giácàphê') {
+                                sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+                                let message = '';
+                                getCafePrice().then(res => {
+                                    for (const item of res) {
+                                        message += item.province + ": " + item.price + "₫\n";
+                                    }
+                                    sendMessage(senderId, message);
+                                }).catch(err => console.log(err));
                             }
-                        }).catch(err => console.log(err));
-                    }
+                        }
                 }
             }
         });
@@ -51,6 +59,45 @@ app.post('/webhook', (req, res) => {
     }
 
 });
+
+function sendGetStarted(recipientId) {
+    let messageData = {
+        recipient: {
+            id: recipientId
+        },
+        message: {
+            attachment: {
+                type: "template",
+                payload: {
+                    template_type: "button",
+                    text: "Welcome to the Bot Hotel, I can help with any of the three requests below.",
+                    buttons:[{
+                        type: "postback",
+                        title: "Check in",
+                        payload: "check_in"
+                    }, {
+                        type: "postback",
+                        title: "Room Service",
+                        payload: "room_service"
+                    }, {
+                        type: "phone_number",
+                        title: "Call Reception",
+                        payload: "+16505551234"
+                    }]
+                }
+            }
+        }
+    };
+
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: process.env.TOKEN,
+        },
+        method: 'POST',
+        json: messageData
+    });
+}
 
 async function getCafePrice() {
     try {
@@ -112,7 +159,6 @@ function sendMessage(senderId, message) {
 // Adds support for GET requests to our webhook
 app.get('/webhook', (req, res) => {
 
-    // Your verify token. Should be a random string.
     let VERIFY_TOKEN = process.env.MY_VERIFY_TOKEN;
 
     // Parse the query params
