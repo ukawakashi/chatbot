@@ -31,11 +31,17 @@ app.post('/webhook', (req, res) => {
                     let text = message.message.text;
 
                     text = text.toLowerCase().replace(/\s+/g, '');
+                    // Handle user message
+                }
+                else if(message.postback && message.postback.payload) {
+                    let message = '';
 
-                    if (text === 'giacaphe' || text === 'giácàphê') {
+                    if(message.postback.payload === 'Get Started') {
+                        sendGetStarted(senderId);
+                    }
+                    else if(message.postback.payload === 'cafe_price') {
 
                         sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                        let message = '';
 
                         getCafePrice().then(res => {
                             for (const item of res) {
@@ -44,9 +50,11 @@ app.post('/webhook', (req, res) => {
                             sendMessage(senderId, message);
                         }).catch(err => console.log(err));
                     }
-                }
-                else if(message.postback && message.postback.payload) {
-                    sendGetStarted(senderId);
+                    else if(message.postback.payload === 'about') {
+                        message = "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3";
+                        sendMessage(senderId, message);
+                    }
+
                 }
 
             }
@@ -71,19 +79,15 @@ function sendGetStarted(recipientId) {
                 type: "template",
                 payload: {
                     template_type: "button",
-                    text: "Welcome to the Bot Hotel, I can help with any of the three requests below.",
+                    text: "Chào {{user_first_name}}! Bạn cần thông tin gì nào ^_^",
                     buttons:[{
                         type: "postback",
-                        title: "Check in",
-                        payload: "check_in"
+                        title: "Xem giá cà phê",
+                        payload: "cafe_price"
                     }, {
                         type: "postback",
-                        title: "Room Service",
-                        payload: "room_service"
-                    }, {
-                        type: "phone_number",
-                        title: "Call Reception",
-                        payload: "+16505551234"
+                        title: "About",
+                        payload: "about"
                     }]
                 }
             }
