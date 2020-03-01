@@ -34,27 +34,26 @@ app.post('/webhook', (req, res) => {
                     // Handle user message
                 }
                 else if(message.postback && message.postback.payload) {
-                    //let message = '';
-                    sendGetStarted(senderId);
-                    console.log(message.postback.payload);
-                    // if(message.postback.payload === 'Get Started') {
-                    //     sendGetStarted(senderId);
-                    // }
-                    // else if(message.postback.payload === 'cafe_price') {
-                    //
-                    //     sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
-                    //
-                    //     getCafePrice().then(res => {
-                    //         for (const item of res) {
-                    //             message += item.province + ": " + item.price + "₫\n";
-                    //         }
-                    //         sendMessage(senderId, message);
-                    //     }).catch(err => console.log(err));
-                    // }
-                    // else if(message.postback.payload === 'about') {
-                    //     message = "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3";
-                    //     sendMessage(senderId, message);
-                    // }
+                    let message = '';
+
+                    if(message.postback.payload === 'GET STARTED') {
+                        sendGetStarted(senderId);
+                    }
+                    else if(message.postback.payload === 'cafe_price') {
+
+                        sendMessage(senderId, "Chào bạn\nGiá cà phê hôm nay:");
+
+                        getCafePrice().then(res => {
+                            for (const item of res) {
+                                message += item.province + ": " + item.price + "₫\n";
+                            }
+                            sendMessage(senderId, message);
+                        }).catch(err => console.log(err));
+                    }
+                    else if(message.postback.payload === 'about') {
+                        message = "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3";
+                        sendMessage(senderId, message);
+                    }
 
                 }
 
@@ -80,7 +79,7 @@ function sendGetStarted(recipientId) {
                 type: "template",
                 payload: {
                     template_type: "button",
-                    text: "Chào {{user_first_name}}! Bạn cần thông tin gì nào ^_^",
+                    text: "Chào {{user_full_name}}! Bạn cần thông tin gì nào ^_^",
                     buttons:[{
                         type: "postback",
                         title: "Xem giá cà phê",
