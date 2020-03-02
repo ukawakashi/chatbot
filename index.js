@@ -17,9 +17,6 @@ app.listen(process.env.PORT || 1337, () => console.log('webhook is listening on 
 // Creates the endpoint for our webhook
 app.post('/webhook', (req, res) => {
 
-    // Returns a '200 OK' response to all requests
-    res.status(200).send('EVENT_RECEIVED');
-
     let body = req.body;
 
     // Checks this is an event from a page subscription
@@ -30,20 +27,28 @@ app.post('/webhook', (req, res) => {
             let messaging = entry.messaging;
 
             for(let message of messaging) {
+                console.log(message);
+                if (!message.hasOwnProperty('delivery')) {
 
-                let senderId = message.sender.id;
+                    let senderId = message.sender.id;
 
-                if(message.message && message.message.text) {
-                    let text = message.message.text;
+                    if (message.message && message.message.text) {
+                        let text = message.message.text;
 
-                    text = text.toLowerCase().replace(/\s+/g, '');
-                    // Handle user message
-                }
-                else if(message.postback && message.postback.payload) {
-                    handlePostback(senderId, message.postback);
+                        text = text.toLowerCase().replace(/\s+/g, '');
+                        // Handle user message
+                    } else if (message.postback && message.postback.payload) {
+                        handlePostback(senderId, message.postback);
+                    }
                 }
             }
         });
+        // Returns a '200 OK' response to all requests
+        res.status(200).send('EVENT_RECEIVED');
+    }
+    else {
+        // Returns a '404 Not Found' if event is not from a page subscription
+        res.sendStatus(404);
     }
 });
 
