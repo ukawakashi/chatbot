@@ -59,13 +59,6 @@ function handlePostback(senderId, messagePostback) {
         case "GET STARTED":
             handleGreetingPostback(senderId);
             break;
-        case "ABOUT":
-            message = {
-                text: "Đây là boss của tôi :)) " + "https://www.facebook.com/tranchinh.pham.3"
-            };
-
-            callSendAPI(senderId, message);
-            break;
         case "CAFE_PRICE":
             callSendAPI(senderId, {text: "Giá cà phê hôm nay:"});
             let text = '';
@@ -100,28 +93,12 @@ function handleGreetingPostback(recipientId) {
             let data = JSON.parse(body);
             const firstName = data.first_name;
             const lastName = data.last_name;
-            greeting = "Chào " + firstName+ " " + lastName + "! Bạn cần thông tin gì nào ^_^";
+            greeting = "Chào " + firstName+ " " + lastName + "! Bạn có thể ra lệnh cho tôi bằng các nút bên trong hộp thoại của menu bên dưới 👇";
         }
-
-        const greetingPayload = {
-            attachment: {
-                type: "template",
-                payload: {
-                    template_type: "button",
-                    text: greeting,
-                    buttons:[{
-                        type: "postback",
-                        title: "Xem giá cà phê",
-                        payload: "CAFE_PRICE"
-                    }, {
-                        type: "postback",
-                        title: "About",
-                        payload: "ABOUT"
-                    }]
-                }
-            }
+        let mess = {
+            text: greeting
         };
-        callSendAPI(recipientId, greetingPayload);
+        callSendAPI(recipientId, mess);
     });
 }
 
