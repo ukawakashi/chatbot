@@ -67,7 +67,7 @@ function handlePostback(senderId, messagePostback) {
             callSendAPI(senderId, message);
             break;
         case "CAFE_PRICE":
-            callSendAPI(senderId, {text: "Chào bạn\nGiá cà phê hôm nay:"});
+            callSendAPI(senderId, {text: "Giá cà phê hôm nay:"});
             let text = '';
 
             getCafePrice().then(res => {
