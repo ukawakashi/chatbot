@@ -24,24 +24,22 @@ app.post('/webhook', (req, res) => {
 
         // Iterates over each entry - there may be multiple if batched
         body.entry.forEach(function(entry) {
-            let messaging = entry.messaging;
+            let message = entry.messaging[0];
+            console.log(message);
+            if (!message.hasOwnProperty('delivery')) {
 
-            for(let message of messaging) {
-                console.log(message);
-                if (!message.hasOwnProperty('delivery')) {
+                let senderId = message.sender.id;
 
-                    let senderId = message.sender.id;
+                if (message.message && message.message.text) {
+                    let text = message.message.text;
 
-                    if (message.message && message.message.text) {
-                        let text = message.message.text;
-
-                        text = text.toLowerCase().replace(/\s+/g, '');
-                        // Handle user message
-                    } else if (message.postback && message.postback.payload) {
-                        handlePostback(senderId, message.postback);
-                    }
+                    text = text.toLowerCase().replace(/\s+/g, '');
+                    // Handle user message
+                } else if (message.postback && message.postback.payload) {
+                    handlePostback(senderId, message.postback);
                 }
             }
+
         });
         // Returns a '200 OK' response to all requests
         res.status(200).send('EVENT_RECEIVED');
