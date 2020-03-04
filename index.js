@@ -60,14 +60,8 @@ function handlePostback(senderId, messagePostback) {
             handleGreetingPostback(senderId);
             break;
         case "CAFE_PRICE":
-            callSendAPI(senderId, {text: "Giá cà phê hôm nay:"});
-            let text = '';
-
             getCafePrice().then(res => {
-                for (const item of res) {
-                    text += item.province + ": " + item.price + "₫\n";
-                }
-                message = { text: text };
+                message = { text: res };
                 callSendAPI(senderId, message);
             }).catch(err => console.log(err));
             break;
@@ -104,33 +98,45 @@ function handleGreetingPostback(recipientId) {
 
 async function getCafePrice() {
     try {
-        let fResult = [];
+        let fResult = '';
 
         const browser = await puppeteer.launch({args: ['--no-sandbox']});
         const page = await browser.newPage();
-        await page.goto('https://giacaphe.com/gia-ca-phe-noi-dia', {waitUntil: 'domcontentloaded'});
+        await page.goto('https://tintaynguyen.com/gia-ca-phe-doanh-nghiep/', {waitUntil: 'domcontentloaded'});
 
         fResult = await page.evaluate(() => {
-            let provinces = document.getElementById('gia_trong_nuoc').querySelectorAll('.gnd_market');
-            let price = document.getElementById('gia_trong_nuoc').querySelectorAll('.tdLast');
-            let listProvinces = [];
-            let listPrice = [];
-            let result = [];
-            provinces.forEach((item) => {
-                listProvinces.push(item.innerText);
-            });
-            price.forEach((province) => {
-                listPrice.push(province.innerText);
-            });
+            let mess = document.getElementsByClassName('the-article-title')[0].innerText;
+            mess += '\n';
 
-            for (let i = 1; i < listPrice.length - 2; i++) {
-                result.push({
-                    province: listProvinces[i],
-                    price: listPrice[i]
-                });
+            let table = document.getElementsByClassName('quotes-table')[0];
+            let rowLength = table.rows.length;
+
+            for (let i = 0; i < rowLength - 2; i++){
+                let messRow = '';
+                //gets cells of current row
+                let cells = table.rows.item(i).cells;
+
+                //gets amount of cells of current row
+                let cellLength = cells.length;
+
+                //loops through each cell in current row
+                for(let j = 0; j < cellLength; j++){
+                    // get your cell info here
+                    let val = cells.item(j).innerText.replace('ROBUSTA', '');
+
+                    if(val[val.length - 1] === '0') {
+                        val += '₫';
+                    }
+                    if (j === cellLength - 1) {
+                        messRow += val + '\n';
+                    }
+                    else {
+                        messRow += val + ' ';
+                    }
+                }
+                mess += messRow;
             }
-
-            return result;
+            return mess;
         });
         await browser.close();
         return Promise.resolve(fResult);
