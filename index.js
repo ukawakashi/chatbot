@@ -65,6 +65,12 @@ function handlePostback(senderId, messagePostback) {
                 callSendAPI(senderId, message);
             }).catch(err => console.log(err));
             break;
+        case "PEPPER_PRICE":
+            getPepperPrice().then(res => {
+                message = { text: res };
+                callSendAPI(senderId, message);
+            }).catch(err => console.log(err));
+            break;
         default:
     }
 }
@@ -111,7 +117,7 @@ async function getCafePrice() {
             let table = document.getElementsByClassName('quotes-table')[0];
             let rowLength = table.rows.length;
 
-            for (let i = 0; i < rowLength - 2; i++){
+            for (let i = 1; i < rowLength - 2; i++){
                 let messRow = '';
                 //gets cells of current row
                 let cells = table.rows.item(i).cells;
@@ -123,6 +129,56 @@ async function getCafePrice() {
                 for(let j = 0; j < cellLength; j++){
                     // get your cell info here
                     let val = cells.item(j).innerText.replace('ROBUSTA', '');
+
+                    if(val[val.length - 1] === '0') {
+                        val += '₫';
+                    }
+                    if (j === cellLength - 1) {
+                        messRow += val + '\n';
+                    }
+                    else {
+                        messRow += val + ' ';
+                    }
+                }
+                mess += messRow;
+            }
+            return mess;
+        });
+        await browser.close();
+        return Promise.resolve(fResult);
+    }
+    catch (e) {
+        return Promise.reject(e);
+    }
+}
+
+async function getPepperPrice() {
+    try {
+        let fResult = '';
+
+        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+        const page = await browser.newPage();
+        await page.goto('https://tintaynguyen.com/gia-tieu/', {waitUntil: 'domcontentloaded'});
+
+        fResult = await page.evaluate(() => {
+            let mess = document.getElementsByClassName('the-article-title')[0].innerText;
+            mess += '\n';
+
+            let table = document.getElementsByClassName('quotes-table')[0];
+            let rowLength = table.rows.length;
+
+            for (let i = 1; i < rowLength; i++){
+                let messRow = '';
+                //gets cells of current row
+                let cells = table.rows.item(i).cells;
+
+                //gets amount of cells of current row
+                let cellLength = cells.length;
+
+                //loops through each cell in current row
+                for(let j = 0; j < cellLength; j++){
+                    // get your cell info here
+                    let val = cells.item(j).innerText;
 
                     if(val[val.length - 1] === '0') {
                         val += '₫';
