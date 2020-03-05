@@ -26,7 +26,7 @@ app.post('/webhook', (req, res) => {
         body.entry.forEach(function(entry) {
             let message = entry.messaging[0];
             console.log(message);
-            if (!message.hasOwnProperty('delivery')) {
+            if (message.hasOwnProperty('delivery')) {
 
                 let senderId = message.sender.id;
 
