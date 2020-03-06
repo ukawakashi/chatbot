@@ -14,6 +14,8 @@ const
 // Sets server port and logs message on success
 app.listen(process.env.PORT || 1337, () => console.log('webhook is listening on port ' + process.env.PORT));
 
+let arrMessage = [];
+let flag = true;
 // Creates the endpoint for our webhook
 app.post('/webhook', (req, res) => {
 
@@ -24,18 +26,37 @@ app.post('/webhook', (req, res) => {
 
         // Iterates over each entry - there may be multiple if batched
         let message = body.entry[0].messaging[0];
+
         console.log(message);
         if (!message.hasOwnProperty('delivery')) {
 
+            arrMessage.push(message);
             let senderId = message.sender.id;
 
-            if (message.message && message.message.text) {
-                let text = message.message.text;
+            if(arrMessage.length === 2) {
+                console.log(arrMessage);
+                if(arrMessage[0].timestamp === arrMessage[1].timestamp) {
+                    flag = false;
+                }
+                else {
+                    arrMessage.shift();
+                }
+            }
 
-                text = text.toLowerCase().replace(/\s+/g, '');
-                // Handle user message
-            } else if (message.postback && message.postback.payload) {
-                handlePostback(senderId, message.postback);
+            if(flag) {
+                if (message.message && message.message.text) {
+                    let text = message.message.text;
+
+                    text = text.toLowerCase().replace(/\s+/g, '');
+                    // Handle user message
+                }
+                else if (message.postback && message.postback.payload) {
+                    handlePostback(senderId, message.postback);
+                }
+            }
+            else {
+                flag = true;
+                arrMessage.shift();
             }
         }
 
