@@ -92,6 +92,8 @@ function handlePostback(senderId, messagePostback) {
             let info = '';
             getCovidInfo().then(data => {
                 console.log('get data ' + data);
+                data = JSON.parse(data);
+                console.log('parse ' + data);
                 info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
                     + '\n- Tử vong: ' + data.data.global.deaths
                     + '\n- Đã hồi phục: ' + data.data.global.recovered
@@ -243,7 +245,7 @@ async function getCovidInfo() {
                 console.log("Unable to send message: ", err);
             }
             console.log('data ' + data);
-            return JSON.parse(data);
+            return data;
         });
         console.log('result ' + result);
         return Promise.resolve(result);
