@@ -94,9 +94,9 @@ function handlePostback(senderId, messagePostback) {
                 info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
                     + '\n- Tử vong: ' + data.data.global.deaths
                     + '\n- Đã hồi phục: ' + data.data.global.recovered
-                    + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                    + '\n- Tử vong: ' + data.data.global.deaths
-                    + '\n- Đã hồi phục: ' + data.data.global.recovered;
+                    + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.vietnam.cases
+                    + '\n- Tử vong: ' + data.data.vietnam.deaths
+                    + '\n- Đã hồi phục: ' + data.data.vietnam.recovered;
                 message = { text: info };
                 callSendAPI(senderId, message);
             }).catch(err => console.log(err));
@@ -241,7 +241,7 @@ async function getCovidInfo() {
             if (err) {
                 console.log("Unable to send message: ", err);
             }
-            return data;
+            return JSON.parse(data);
         });
         return Promise.resolve(result);
     }
