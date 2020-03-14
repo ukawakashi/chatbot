@@ -90,9 +90,9 @@ function handlePostback(senderId, messagePostback) {
             break;
         case "CORONA":
             let info = '';
-            getCovidInfo().then(data => {
-                console.log('get data ' + data);
-                data = JSON.parse(data);
+            getCovidInfo().then(body => {
+                console.log('get data ' + body);
+                let data = JSON.parse(body);
                 console.log('parse ' + data);
                 info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
                     + '\n- Tử vong: ' + data.data.global.deaths
