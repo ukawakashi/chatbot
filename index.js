@@ -89,7 +89,10 @@ function handlePostback(senderId, messagePostback) {
             }).catch(err => console.log(err));
             break;
         case "CORONA":
-            callSendAPI(senderId, { text: getCovidInfo()});
+            getCovidInfo().then(res => {
+                message = { text: res };
+                callSendAPI(senderId, message);
+            }).catch(err => console.log(err));
             break;
         default:
     }
@@ -222,24 +225,30 @@ async function getPepperPrice() {
     }
 }
 
-function getCovidInfo() {
-    let info = '';
-    request({
-        url: 'https://code.junookyo.xyz/api/ncov-moh/data.json',
-        method: 'GET'
-    }, (err, res, data) => {
-        if(err) {
-            console.log("Unable to send message: ", err);
-        }
-        info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                           + '\n- Tử vong: ' + data.data.global.deaths
-                           + '\n- Đã hồi phục: ' + data.data.global.recovered
-              +'\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                               + '\n- Tử vong: ' + data.data.global.deaths
-                               + '\n- Đã hồi phục: ' + data.data.global.recovered;
+async function getCovidInfo() {
+    try {
+        let info = '';
+        let result = await request({
+            url: 'https://code.junookyo.xyz/api/ncov-moh/data.json',
+            method: 'GET'
+        }, (err, res, data) => {
+            if (err) {
+                console.log("Unable to send message: ", err);
+            }
+            info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
+                + '\n- Tử vong: ' + data.data.global.deaths
+                + '\n- Đã hồi phục: ' + data.data.global.recovered
+                + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.global.cases
+                + '\n- Tử vong: ' + data.data.global.deaths
+                + '\n- Đã hồi phục: ' + data.data.global.recovered;
 
-        return info;
-    });
+            return info;
+        });
+        return Promise.resolve(result);
+    }
+    catch (e) {
+        return Promise.reject(e);
+    }
 }
 
 // Send message to REST API to reply user message
