@@ -89,8 +89,15 @@ function handlePostback(senderId, messagePostback) {
             }).catch(err => console.log(err));
             break;
         case "CORONA":
-            getCovidInfo().then(res => {
-                message = { text: res };
+            let info = '';
+            getCovidInfo().then(data => {
+                info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
+                    + '\n- Tử vong: ' + data.data.global.deaths
+                    + '\n- Đã hồi phục: ' + data.data.global.recovered
+                    + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.global.cases
+                    + '\n- Tử vong: ' + data.data.global.deaths
+                    + '\n- Đã hồi phục: ' + data.data.global.recovered;
+                message = { text: info };
                 callSendAPI(senderId, message);
             }).catch(err => console.log(err));
             break;
@@ -227,7 +234,6 @@ async function getPepperPrice() {
 
 async function getCovidInfo() {
     try {
-        let info = '';
         let result = await request({
             url: 'https://code.junookyo.xyz/api/ncov-moh/data.json',
             method: 'GET'
@@ -235,14 +241,7 @@ async function getCovidInfo() {
             if (err) {
                 console.log("Unable to send message: ", err);
             }
-            info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                + '\n- Tử vong: ' + data.data.global.deaths
-                + '\n- Đã hồi phục: ' + data.data.global.recovered
-                + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                + '\n- Tử vong: ' + data.data.global.deaths
-                + '\n- Đã hồi phục: ' + data.data.global.recovered;
-
-            return info;
+            return data;
         });
         return Promise.resolve(result);
     }
