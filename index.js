@@ -90,19 +90,16 @@ function handlePostback(senderId, messagePostback) {
             break;
         case "CORONA":
             let info = '';
-            getCovidInfo().then(body => {
-                console.log('get data ' + body);
-                let data = JSON.parse(body);
-                console.log('parse ' + data);
-                info = 'Thế giới:' + '\n- Số ca nhiễm: ' + data.data.global.cases
-                    + '\n- Tử vong: ' + data.data.global.deaths
-                    + '\n- Đã hồi phục: ' + data.data.global.recovered
-                    + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + data.data.vietnam.cases
-                    + '\n- Tử vong: ' + data.data.vietnam.deaths
-                    + '\n- Đã hồi phục: ' + data.data.vietnam.recovered;
+            getCovidInfo().then(result => {
+                info = 'Thế giới:' + '\n- Số ca nhiễm: ' + result.data.global.cases
+                    + '\n- Tử vong: ' + result.data.global.deaths
+                    + '\n- Đã hồi phục: ' + result.data.global.recovered
+                    + '\n\nViệt Nam:' + '\n- Số ca nhiễm: ' + result.data.vietnam.cases
+                    + '\n- Tử vong: ' + result.data.vietnam.deaths
+                    + '\n- Đã hồi phục: ' + result.data.vietnam.recovered;
                 message = { text: info };
                 callSendAPI(senderId, message);
-            }).catch(err => console.log(err));
+            }).catch(err => console.log('covid info err:' + err));
             break;
         default:
     }
@@ -235,24 +232,23 @@ async function getPepperPrice() {
     }
 }
 
-async function getCovidInfo() {
-    try {
-        let result = await request({
+function getCovidInfo() {
+
+    return new Promise((resolve, reject) => {
+
+        request({
             url: 'https://code.junookyo.xyz/api/ncov-moh/data.json',
             method: 'GET'
         }, (err, res, data) => {
-            if (err) {
-                console.log("Unable to send message: ", err);
+            if(err) {
+                reject(err);
             }
-            console.log('data ' + data);
-            return data;
+            else {
+                resolve(JSON.parse(data));
+            }
         });
-        console.log('result ' + result);
-        return Promise.resolve(result);
-    }
-    catch (e) {
-        return Promise.reject(e);
-    }
+
+    });
 }
 
 // Send message to REST API to reply user message
